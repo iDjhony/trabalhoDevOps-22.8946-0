@@ -1,1 +1,0 @@
-# trabalhoDevOps-22.8946-0
