@@ -1,4 +1,4 @@
-version: '3.7'
+version: "3.7"
 
 services:
   flask:
@@ -8,7 +8,7 @@ services:
     ports:
       - "5000:5000"
     environment:
-      - FLASK_ENV=development
+      - DATABASE_URL=mysql+pymysql://flask_user:flask_password@mariadb:3306/school_db
     depends_on:
       - mariadb
 
@@ -19,10 +19,21 @@ services:
     ports:
       - "3306:3306"
     environment:
-      MYSQL_ROOT_PASSWORD: root_password
-      MYSQL_DATABASE: school_db
-      MYSQL_USER: flask_user
-      MYSQL_PASSWORD: flask_password
+      - MYSQL_ROOT_PASSWORD=root_password
+      - MYSQL_DATABASE=school_db
+      - MYSQL_USER=flask_user
+      - MYSQL_PASSWORD=flask_password
+
+  test:
+    build:
+      context: ./flask
+      dockerfile: Dockerfile_flask
+    command: ["pytest", "/app/test_app.py"] # Roda os testes no arquivo test_app.py
+    depends_on:
+      - mariadb
+      - flask
+    environment:
+      - DATABASE_URL=mysql+pymysql://flask_user:flask_password@mariadb:3306/school_db
 
   prometheus:
     image: prom/prometheus
@@ -37,10 +48,10 @@ services:
 
   mysqld_exporter:
     image: prom/mysqld-exporter
+    environment:
+      - DATA_SOURCE_NAME=mysql://flask_user:flask_password@mariadb:3306/school_db
     ports:
       - "9104:9104"
-    environment:
-      DATA_SOURCE_NAME: "user:password@(mariadb:3306)/"
     depends_on:
       - mariadb
 
@@ -52,6 +63,6 @@ services:
       - "3000:3000"
     depends_on:
       - prometheus
-    volumes:
-      - ./grafana/provisioning:/etc/grafana/provisioning
-      - ./grafana/dashboards:/var/lib/grafana/dashboards
+#    volumes:
+#      - ./grafana/provisioning:/etc/grafana/provisioning
+#      - ./grafana/dashboards:/var/lib/grafana/dashboards

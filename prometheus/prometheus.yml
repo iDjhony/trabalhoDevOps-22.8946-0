@@ -1,12 +1,26 @@
 global:
   scrape_interval: 15s  # Intervalo padrão de coleta de métricas para todos os jobs
+  evaluation_interval: 15s  # Intervalo para avaliação de regras
 
 scrape_configs:
   - job_name: 'prometheus'  # Nome do job para o Prometheus
+    scrape_interval: 10s  # Intervalo específico para este job
     static_configs:
-      - targets: ['localhost:9090']  # Definição do alvo, neste caso o próprio Prometheus
+      - targets: ['localhost:9090']  # Coletando métricas do próprio Prometheus
+        labels:
+          job_group: 'monitoramento'
 
   - job_name: 'mysqld_exporter'  # Nome do job para o MySQL Exporter
+    scrape_interval: 20s  # Intervalo de coleta ajustado para este job
     static_configs:
-      - targets: ['mysqld_exporter:9104']  # Definição do alvo para coletar métricas do MySQL Exporter
+      - targets: ['mysqld_exporter:9104']  # Coletando métricas do MySQL Exporter
+        labels:
+          database: 'mysql'
+          job_group: 'banco_de_dados'
 
+  - job_name: 'node_exporter'  # Monitoramento de sistemas (exemplo)
+    static_configs:
+      - targets: ['node_exporter:9100']
+        labels:
+          system: 'node'
+          job_group: 'infraestrutura'
